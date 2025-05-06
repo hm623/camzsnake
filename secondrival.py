@@ -114,13 +114,7 @@ def start_snake_game():
     pen.write("Your Score: 0  High Score: 0", align="center", font=("Courier", 24, "normal"))
 
     # Player Controls
-    def go_up():
-        if head.direction != "down":
-            head.direction = "up"
-
-    def go_down():
-        if head.direction != "up":
-            head.direction = "down"
+    
 
     def go_left():
         if head.direction != "right":
@@ -129,6 +123,14 @@ def start_snake_game():
     def go_right():
         if head.direction != "left":
             head.direction = "right"
+
+    def go_up():
+        if head.direction != "down":
+            head.direction = "up"
+
+    def go_down():
+        if head.direction != "up":
+            head.direction = "down"
 
     def move():
         if head.direction == "up":
