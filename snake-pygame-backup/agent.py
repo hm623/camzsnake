@@ -5,20 +5,10 @@ from collections import deque
 from game import SnakeGameAI, Direction, Point
 from model import Linear_QNet, QTrainer 
 from helper  import plot
-import csv
-import os 
-
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
 LR = 0.001
-
-csv_path = "training_log.csv"
-if not os.path.exists(csv_path):
-    with open(csv_path, mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(["Game", "Score", "Record", "Mean Score"])
-
 
 class Agent: 
 
@@ -137,25 +127,15 @@ def train():
 
             if score > record:
                 record = score
-                agent.model.save(f"model{agent.n_games}-{score}")
+                agent.model.save()
 
             print('Game', agent.n_games, 'Score', score, 'Record:', record)
 
-            #plot_scores.append(score)
-            #total_score += score
-            #mean_score = total_score / agent.n_games
-            #plot_mean_scores.append(mean_score)
-            #plot(plot_scores, plot_mean_scores)
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
-
-            # Append to CSV file
-            with open(csv_path, mode='a', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow([agent.n_games, score, record, mean_score])
-
+            plot(plot_scores, plot_mean_scores)
 
 
 # 👇 Run training only if file is run directly
