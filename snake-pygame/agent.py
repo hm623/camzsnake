@@ -13,7 +13,7 @@ MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
 LR = 0.001
 
-csv_path = "training_log.csv"
+csv_path = "training_log_2.csv"
 if not os.path.exists(csv_path):
     with open(csv_path, mode='w', newline='') as file:
         writer = csv.writer(file)
@@ -137,7 +137,7 @@ def train():
 
             if score > record:
                 record = score
-                agent.model.save(f"model{agent.n_games}-{score}")
+                agent.model.save(f"model_g3_{agent.n_games}-{score}")
 
             print('Game', agent.n_games, 'Score', score, 'Record:', record)
 
