@@ -5,22 +5,38 @@ import random
 import torch
 from model import Linear_QNet
 
-# Load trained DQN model (CPU only)
+# Load trained DQN models (CPU only)
 import os
-model = Linear_QNet(11, 256, 3)
-model_path = 'model/model202-74'
-if os.path.exists(model_path):
-    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
-    model.eval()
+
+# Blue AI Snake model
+comp_model = Linear_QNet(11, 256, 3)
+comp_model_path = 'model/model202-74'
+if os.path.exists(comp_model_path):
+    comp_model.load_state_dict(torch.load(comp_model_path, map_location=torch.device('cpu')))
+    comp_model.eval()
 else:
-    print(f"Error: Trained model not found at {model_path}. Please train the model first and place the .pth file in the 'model' directory.")
+    print(f"Error: Trained model not found at {comp_model_path}. Please train the model first and place the file in the 'model' directory.")
+    turtle.bye()
+    exit()
+
+# Orange AI Snake model
+orange_model = Linear_QNet(11, 256, 3)
+orange_model_path = 'model/model.pth'  
+if os.path.exists(orange_model_path):
+    orange_model.load_state_dict(torch.load(orange_model_path, map_location=torch.device('cpu')))
+    orange_model.eval()
+else:
+    print(f"Error: Trained orange model not found at {orange_model_path}. Please train the orange AI model first and place the file in the 'model' directory.")
     turtle.bye()
     exit()
 
 # Initialize pygame mixer for audio
 pygame.mixer.init()
 
-delay = 0.000  # 2x speedup
+apple_sound = pygame.mixer.Sound('apple.wav')
+
+
+delay = 0.00  # 2x speedup
 score = 0
 high_score = 0
 comp_score = 0
@@ -123,11 +139,16 @@ def start_snake_game():
     def go_down():
         if head.direction != "up": head.direction = "down"
 
+    def quit_game():
+        turtle.bye()
+        exit()
+
     wn.listen()
     wn.onkeypress(go_up, "w"); wn.onkeypress(go_up, "Up")
     wn.onkeypress(go_down, "s"); wn.onkeypress(go_down, "Down")
     wn.onkeypress(go_left, "a"); wn.onkeypress(go_left, "Left")
     wn.onkeypress(go_right, "d"); wn.onkeypress(go_right, "Right")
+    wn.onkeypress(quit_game, "q")
 
     def move_player():
         if head.direction == "up": head.sety(head.ycor() + 20)
@@ -135,7 +156,8 @@ def start_snake_game():
         elif head.direction == "left": head.setx(head.xcor() - 20)
         elif head.direction == "right": head.setx(head.xcor() + 20)
 
-    def move_ai_snake(snake_head, segments):
+    # AI movement with variable model
+    def move_ai_snake(snake_head, segments, q_model):
         global comp_score, orange_score
         def collision(x, y):
             if x > 300 or x < -300 or y > 220 or y < -220:
@@ -153,7 +175,7 @@ def start_snake_game():
         dirs = ["right","down","left","up"]
         idx = dirs.index(snake_head.direction)
         x,y = snake_head.xcor(), snake_head.ycor()
-        points = {("l"): (x-20,y), ("r"): (x+20,y), ("u"): (x,y+20), ("d"): (x,y-20)}
+        points = {"l": (x-20,y), "r": (x+20,y), "u": (x,y+20), "d": (x,y-20)}
         dirs_bool = {d: snake_head.direction==d for d in ["left","right","up","down"]}
         state = [
             (dirs_bool["right"] and collision(*points["r"])) or
@@ -172,7 +194,7 @@ def start_snake_game():
             food.xcor()<x, food.xcor()>x, food.ycor()>y, food.ycor()<y
         ]
         tensor = torch.tensor(state, dtype=torch.float)
-        pred = model(tensor)
+        pred = q_model(tensor)
         m = torch.argmax(pred).item()
         new_dir = dirs[idx] if m==0 else dirs[(idx+1)%4] if m==1 else dirs[(idx-1)%4]
         snake_head.direction = new_dir
@@ -200,8 +222,8 @@ def start_snake_game():
         if orange_segments: orange_segments[0].goto(orange_head.pos())
 
         move_player()
-        move_ai_snake(comp_head, comp_segments)
-        move_ai_snake(orange_head, orange_segments)
+        move_ai_snake(comp_head, comp_segments, comp_model)
+        move_ai_snake(orange_head, orange_segments, orange_model)
 
         # Player boundary check
         if head.xcor() > 300 or head.xcor() < -300 or head.ycor() > 220 or head.ycor() < -220:
@@ -213,6 +235,7 @@ def start_snake_game():
             score = 0
 
         if head.distance(food)<20:
+            apple_sound.play() 
             food.goto(random.randint(-280,280), random.randint(-200,200))
             new_seg = turtle.Turtle(); new_seg.speed(0)
             new_seg.shape("square"); new_seg.color("green"); new_seg.penup()
