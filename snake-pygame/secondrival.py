@@ -21,7 +21,7 @@ else:
 
 # Orange AI Snake model
 orange_model = Linear_QNet(11, 256, 3)
-orange_model_path = 'model/model.pth'  
+orange_model_path = 'model/model_g3_196-71'  
 if os.path.exists(orange_model_path):
     orange_model.load_state_dict(torch.load(orange_model_path, map_location=torch.device('cpu')))
     orange_model.eval()
