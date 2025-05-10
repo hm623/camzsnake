@@ -2,80 +2,7 @@ import pygame
 import turtle
 import time
 import random
-import openai
-from dotenv import load_dotenv
 import os
-
-load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
-def get_hint_path():
-    global head, food, segments, obstacles
-    grid_size = [96, 54]  # assuming 20px per grid cell on a 1920x1080 canvas
-    grid_unit = 20
-
-    # Convert all coordinates to grid cells
-    def to_grid(pos): return [int(pos[0] // grid_unit), int(pos[1] // grid_unit)]
-
-    head_pos = to_grid((head.xcor(), head.ycor()))
-    food_pos = to_grid((food.xcor(), food.ycor()))
-    snake_body = [to_grid((seg.xcor(), seg.ycor())) for seg in segments]
-    obs_pos = [to_grid((obs.xcor(), obs.ycor())) for obs in obstacles]
-
-    prompt = f"""
-            You are helping in a Snake game played on a grid. The grid size is {grid_size[0]} columns by {grid_size[1]} rows.
-            The snake's head is at {head_pos}.
-            Its body is at {snake_body}.
-            The food is at {food_pos}.
-            The obstacles are at {obs_pos}.
-
-            Generate a list of directions (UP, DOWN, LEFT, RIGHT) that safely guide the snake from its head to the food.
-            Avoid all obstacles and the snake's own body.
-            Make sure the final grid position exactly matches the food location.
-            Respond only with a Python list, like ["RIGHT", "UP", "UP", "LEFT"]. No extra words.
-            """
-
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}]
-        )
-
-        raw_output = response['choices'][0]['message']['content'].strip()
-
-        try:
-            start = raw_output.index("[")
-            end = raw_output.index("]", start) + 1
-            directions = eval(raw_output[start:end])  # safely extract the list
-            highlight_path(head_pos, directions, grid_unit)
-        except Exception as parse_err:
-            print("Hint failed to parse directions:", parse_err)
-            print("Raw output from GPT:", raw_output)
-
-    except Exception as e:
-        print("Hint failed:", e)
-
-
-def highlight_path(start_pos, directions, unit):
-    hint_turtle.clearstamps()
-    pos = start_pos.copy()
-    for direction in directions:
-        if direction == "UP":
-            pos[1] += 1
-        elif direction == "DOWN":
-            pos[1] -= 1
-        elif direction == "LEFT":
-            pos[0] -= 1
-        elif direction == "RIGHT":
-            pos[0] += 1
-
-        x, y = pos[0]*unit, pos[1]*unit
-        hint_turtle.goto(x, y)
-        hint_turtle.stamp()
-    if pos == to_grid((food.xcor(), food.ycor())):
-        print("Path ends exactly on food!")
-    else:
-        print("Path missed the food!")
-
 
 # Initialize pygame mixer for audio
 pygame.mixer.init()
@@ -166,14 +93,6 @@ def start_snake_game():
 
     # Pen
     pen = turtle.Turtle()
-    global hint_turtle
-    hint_turtle = turtle.Turtle()
-    hint_turtle.penup()
-    hint_turtle.shape("square")
-    hint_turtle.color("blue")
-    hint_turtle.shapesize(1, 1)
-    hint_turtle.hideturtle()
-
     pen.speed(0)
     pen.shape("square")
     pen.color("black")
@@ -294,9 +213,7 @@ def start_snake_game():
     wn.onkeypress(go_up, "Up")
     wn.onkeypress(go_down, "Down")
     wn.onkeypress(go_left, "Left")
-    wn.onkeypress(go_right, "Right")
-    wn.onkeypress(get_hint_path, "h")
-    
+    wn.onkeypress(go_right, "Right")    
     game_loop()
 
 # Start the menu
