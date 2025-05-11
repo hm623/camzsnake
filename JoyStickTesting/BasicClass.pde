@@ -17,7 +17,7 @@ class Point
 
 /*
  * Brief  This class is used to save a size
- *****************************************************************************/
+ *********************************************************************************/
 class Size
 {
   int width = 0;
@@ -45,7 +45,7 @@ class Direction
 }
 
 /*
- * Brief  This enum is used to save a gameState
+ * Brief  This is used to save a gameState
  *****************************************************************************/
 class GameState
 {
