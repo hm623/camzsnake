@@ -48,6 +48,7 @@ def main_menu():
     
     def quit_game():
         turtle.bye()
+        exit()
     
     wn.listen()
     wn.onkeypress(start_game, "m")  # Press 'm' to start main play
@@ -71,6 +72,10 @@ def create_obstacles(num_obstacles):
 def start_snake_game():
     global head, food, segments, pen, score, high_score, obstacles
     wn.clear()
+
+    def quit_game():
+        turtle.bye()
+        exit()
     
     # Snake head
     head = turtle.Turtle()
@@ -213,7 +218,9 @@ def start_snake_game():
     wn.onkeypress(go_up, "Up")
     wn.onkeypress(go_down, "Down")
     wn.onkeypress(go_left, "Left")
-    wn.onkeypress(go_right, "Right")    
+    wn.onkeypress(go_right, "Right")   
+    wn.onkeypress(quit_game, "q")
+ 
     game_loop()
 
 # Start the menu
