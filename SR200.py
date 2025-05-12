@@ -32,6 +32,21 @@ wn.setup(width=640, height=480)
 wn.tracer(0)
 
 def main_menu():
+
+    """
+    Displays the main menu for the TeamCAMZ-Rival Snake Beta game.
+
+    The menu provides the following options:
+    - Press 'M' to start the game and play against the computer.
+    - Press 'Q' to quit the game.
+
+    The function sets up the graphical interface for the menu using the turtle module,
+    listens for user input, and binds the appropriate keys to their respective actions:
+    - 'M' key starts the game by calling the `start_snake_game` function.
+    - 'Q' key exits the game by closing the turtle graphics window and terminating the program.
+
+    """
+
     wn.clear()
     wn.bgcolor("white")
     menu_pen = turtle.Turtle()
@@ -59,6 +74,41 @@ def main_menu():
     wn.onkeypress(quit_game, "q")
 
 def start_snake_game():
+
+    """
+    Initializes and starts the snake game with multiple players, including AI-controlled snakes.
+    This function sets up the game environment, including the player-controlled snake, 
+    two AI-controlled snakes, food, and score tracking. It also defines controls for 
+    the player and handles the game loop, which updates the game state and checks for 
+    collisions or interactions.
+    Features:
+    - Player-controlled snake with keyboard controls (W/A/S/D or arrow keys).
+    - Two AI-controlled snakes (blue and orange) with basic decision-making.
+    - Food spawning and score tracking for all snakes.
+    - Boundary collision detection and reset for all snakes.
+    - Dynamic game loop with periodic updates.
+    Controls:
+    - W/Up Arrow: Move up
+    - A/Left Arrow: Move left
+    - S/Down Arrow: Move down
+    - D/Right Arrow: Move right
+    - Q: Quit the game
+    Global Variables:
+    - score: Tracks the player's score.
+    - high_score: Tracks the highest score achieved.
+    - delay: Controls the speed of the game loop.
+    - comp_score: Tracks the score of the blue AI snake.
+    - orange_score: Tracks the score of the orange AI snake.
+    Dependencies:
+    - Requires the `turtle` module for graphics.
+    - Requires the `torch` module for AI decision-making.
+    - Requires the `random` module for food placement.
+    Note:
+    - The game window must be initialized as `wn` before calling this function.
+    - The AI snakes rely on a pre-trained model (`model`) for decision-making.
+    
+    """
+
     global score, high_score, delay, comp_score, orange_score
     wn.clear()
 
@@ -142,6 +192,30 @@ def start_snake_game():
         elif head.direction == "right": head.setx(head.xcor() + 20)
 
     def move_ai_snake(snake_head, segments):
+
+        """
+        Controls the movement of an AI-controlled snake in the game.
+        Args:
+            snake_head (turtle.Turtle): The head of the AI snake, represented as a Turtle object.
+            segments (list): A list of Turtle objects representing the body segments of the snake.
+        Behavior:
+            - The function determines the next move for the AI snake based on its current direction,
+              position, and proximity to the food.
+            - It checks for collisions with the game boundaries and resets the snake's position
+              if a collision occurs.
+            - The AI uses a trained model to predict the next direction to move based on the current
+              state of the game.
+            - If the snake eats the food, a new food position is generated, and a new segment is added
+              to the snake's body. The score is updated based on the snake's color.
+        Global Variables:
+            comp_score (int): The score of the blue snake.
+            orange_score (int): The score of the orange snake.
+        Notes:
+            - The function uses PyTorch for tensor operations and model predictions.
+            - The snake's movement is constrained to a grid with 20-pixel steps.'
+            
+        """        
+
         global comp_score, orange_score
         def collision(x, y):
             if x > 300 or x < -300 or y > 220 or y < -220:
@@ -196,6 +270,39 @@ def start_snake_game():
             else: orange_score +=1
 
     def game_loop():
+
+        """
+        Main game loop for the snake game.
+
+        This function handles the following:
+        - Updates the game window.
+        - Moves the player's snake and AI-controlled snakes.
+        - Checks for boundary collisions for the player's snake.
+        - Handles food consumption by the player's snake and updates the score.
+        - Updates the game scoreboard.
+        - Recursively schedules the next iteration of the game loop.
+
+        Global Variables:
+        - score: The current score of the player.
+        - high_score: The highest score achieved in the game.
+        - delay: The delay between game loop iterations.
+        - segments: List of turtle segments representing the player's snake.
+        - comp_segments: List of turtle segments representing the blue AI snake.
+        - orange_segments: List of turtle segments representing the orange AI snake.
+        - head: The player's snake head turtle object.
+        - comp_head: The blue AI snake head turtle object.
+        - orange_head: The orange AI snake head turtle object.
+        - food: The food turtle object.
+        - pen: The turtle object used for displaying the scoreboard.
+        - wn: The game window object.
+
+        Notes:
+        - The player's snake grows when it eats food.
+        - The game resets the player's snake and score if it collides with the boundary.
+        - The function uses `wn.ontimer` to schedule itself for continuous execution.
+
+        """
+
         global score, high_score, delay
         wn.update()
         for i in range(len(segments)-1,0,-1): segments[i].goto(segments[i-1].pos())

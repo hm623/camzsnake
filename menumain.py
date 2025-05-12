@@ -5,19 +5,27 @@ import subprocess
 
 def run_script(script_name):
     """
-    Executes a Python script using the subprocess module.
-
-    Args:
-        script_name (str): The name of the Python script to be executed.
+        Executes a Python script by invoking it as a subprocess.
+        Args:
+            script_name (str): The name or path of the Python script to execute.
+        Returns:
+            None
     """
     subprocess.run(['python', script_name])
 
 def create_window():
-    
+   
     """
-    Creates and displays the main menu window for the Snake Game.
+        Creates the main menu window for the Snake Game.
+        This function initializes a Tkinter window with a title and several buttons:
+        - A welcome label at the top.
+        - Buttons to launch different game modes by running corresponding scripts:
+            - "Play Test2" runs 'test2.py'.
+            - "Play Obstacle" runs 'Obstacles.py'.
+            - "Play SecondRival" runs 'SecondRival.py'.
+        - An "Exit" button to close the application.
+        The window remains open until the user chooses to exit.
 
-    The menu includes buttons to launch different game modes or exit the application.
     """
 
     window = tk.Tk()

@@ -10,16 +10,15 @@ load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 # Convert all coordinates to grid cells
 def to_grid(pos, grid_unit=20):
-
+    
     """
-    Converts a position to grid coordinates.
-
+    Converts a position in pixel coordinates to grid coordinates.
     Args:
-        pos (tuple): The (x, y) position to convert.
-        grid_unit (int): The size of each grid cell.
-
+        pos (list or tuple): A 2D position represented as (x, y) in pixel coordinates.
+        grid_unit (int, optional): The size of each grid cell in pixels. Defaults to 20.
     Returns:
-        list: The grid coordinates as [x, y].
+        list: A 2D position represented as [x, y] in grid coordinates.
+    
     """
 
     return [int(pos[0] // grid_unit), int(pos[1] // grid_unit)]
@@ -27,9 +26,28 @@ def to_grid(pos, grid_unit=20):
 def get_hint_path():
 
     """
-    Generates a hint path for the snake to safely reach the food.
-
-    Uses OpenAI's GPT model to calculate a safe path avoiding obstacles and the snake's body.
+    Generates a list of directions to guide the snake from its current position to the food
+    while avoiding obstacles and the snake's own body. The function uses an AI model to 
+    compute the path based on the current game state.
+    Global Variables:
+        head: The snake's head object, providing its current position.
+        food: The food object, providing its current position.
+        segments: A list of the snake's body segment objects, providing their positions.
+        obstacles: A list of obstacle objects, providing their positions.
+    Grid Details:
+        - The grid size is defined as 96 columns by 54 rows.
+        - Each grid cell is assumed to be 20 pixels in size.
+    Steps:
+        1. Converts the positions of the snake's head, food, body, and obstacles to grid coordinates.
+        2. Constructs a prompt describing the game state and requests a path from an AI model.
+        3. Parses the AI's response to extract a list of directions (UP, DOWN, LEFT, RIGHT).
+        4. Highlights the computed path on the grid.
+    Exceptions:
+        - Handles errors in the AI response or parsing of directions.
+        - Logs any issues encountered during the process.
+    Note:
+        This function requires the `openai` library for interacting with the AI model.
+    
     """
 
     global head, food, segments, obstacles
@@ -78,12 +96,18 @@ def get_hint_path():
 def highlight_path(start_pos, directions, unit):
 
     """
-    Highlights the path on the screen based on the generated directions.
-
+    Highlights a path on the grid based on a starting position and a sequence of directions.
+    This function uses a turtle object to visually mark the path on the grid. It updates the 
+    position based on the given directions and stamps the turtle at each step. At the end, 
+    it checks if the path ends exactly on the food's position.
     Args:
-        start_pos (list): The starting position of the snake's head in grid coordinates.
-        directions (list): A list of directions (UP, DOWN, LEFT, RIGHT) to follow.
-        unit (int): The size of each grid cell.
+        start_pos (list): The starting position on the grid as a list [x, y].
+        directions (list): A list of strings representing movement directions 
+                           ("UP", "DOWN", "LEFT", "RIGHT").
+        unit (int): The size of one grid unit, used to calculate the turtle's movement.
+    Returns:
+        None
+    
     """
 
     hint_turtle.clearstamps()
@@ -130,9 +154,18 @@ obstacles = []
 def main_menu():
 
     """
-    Displays the main menu for the Snake Game.
-
-    Provides options to start the game or quit.
+    Displays the main menu for the Snake Game - Obstacle Challenge.
+    The menu includes options to start the obstacle play or quit the game.
+    It uses the turtle graphics library to render the menu on the screen.
+    Menu Options:
+    - Press 'M' to start the obstacle play.
+    - Press 'Q' to quit the game.
+    Functions:
+    - start_game: Clears the menu and starts the snake game.
+    - quit_game: Exits the game by closing the turtle graphics window.
+    This function sets up event listeners for the key presses and handles
+    the corresponding actions.
+    
     """
 
     wn.clear()
@@ -166,10 +199,16 @@ def main_menu():
 def create_obstacles(num_obstacles):
 
     """
-    Creates a specified number of obstacles on the screen.
-
+    Creates a specified number of obstacles at random positions on the screen.
+    This function clears any existing obstacles and generates new ones. Each
+    obstacle is represented as a turtle object with a square shape and black
+    color. The obstacles are placed at random positions within a predefined
+    grid.
     Args:
         num_obstacles (int): The number of obstacles to create.
+    Returns:
+        None
+    
     """
 
     global obstacles
@@ -189,9 +228,27 @@ def create_obstacles(num_obstacles):
 def start_snake_game():
 
     """
-    Starts the Snake Game with obstacles.
-
-    Initializes the snake, food, obstacles, and game logic.
+    Initializes and starts the snake game.
+    This function sets up the game environment, including the snake, food, 
+    obstacles, and score display. It also defines the movement and game logic 
+    for the snake, handles collisions, and manages the game loop.
+    Key Features:
+    - Initializes the snake, food, and obstacles.
+    - Displays the current score and high score.
+    - Handles keyboard input for controlling the snake's movement.
+    - Implements game logic for collisions with borders, food, and obstacles.
+    - Plays sound effects for specific events (e.g., eating food, game over).
+    - Continuously updates the game state through a recursive game loop.
+    Keyboard Controls:
+    - 'W' or 'Up Arrow': Move the snake up.
+    - 'S' or 'Down Arrow': Move the snake down.
+    - 'A' or 'Left Arrow': Move the snake left.
+    - 'D' or 'Right Arrow': Move the snake right.
+    - 'H': Get a hint path (if implemented).
+    Note:
+    - The function uses the `turtle` module for graphics and `pygame` for sound effects.
+    - The number of obstacles can be adjusted by modifying the `create_obstacles` call.
+    
     """
 
     global head, food, segments, pen, score, high_score, obstacles
@@ -257,7 +314,15 @@ def start_snake_game():
     def move():
 
         """
-        Moves the snake in the current direction.
+        Moves the snake's head in the current direction by updating its position.
+        The movement is determined by the value of the `head.direction` attribute:
+        - "up": Increases the y-coordinate of the head by 20 units.
+        - "down": Decreases the y-coordinate of the head by 20 units.
+        - "left": Decreases the x-coordinate of the head by 20 units.
+        - "right": Increases the x-coordinate of the head by 20 units.
+        Assumes that `head` is an object with `direction`, `setx`, `sety`, `xcor`, 
+        and `ycor` attributes/methods.
+        
         """
 
         if head.direction == "up":
@@ -272,7 +337,19 @@ def start_snake_game():
     def game_loop():
 
         """
-        Main game loop that updates the game state.
+        The main game loop for the snake game. This function handles the following:
+        - Updates the game window.
+        - Moves the snake segments to follow the head.
+        - Checks for collisions with the border, food, and obstacles.
+        - Plays appropriate sound effects for game events.
+        - Updates the score and high score when the snake eats food.
+        - Resets the game state when the snake collides with the border or obstacles.
+        - Continuously schedules itself to run based on the current game delay.
+        Note:
+        - The function uses global variables such as `score`, `high_score`, `delay`, `segments`, `head`, `food`, `obstacles`, and `pen`.
+        - Sound effects are played using the `pygame.mixer` module.
+        - The game loop is recursively scheduled using `wn.ontimer`.
+        
         """
 
         wn.update()
